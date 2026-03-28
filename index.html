@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Background Remover 🌀</title>
+    <title>图片背景移除工具 🌀</title>
     <style>
         * {
             margin: 0;
@@ -12,7 +12,7 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -25,7 +25,7 @@
             background: white;
             border-radius: 20px;
             padding: 40px;
-            max-width: 600px;
+            max-width: 800px;
             width: 100%;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
@@ -34,7 +34,7 @@
             text-align: center;
             color: #333;
             margin-bottom: 10px;
-            font-size: 28px;
+            font-size: 32px;
         }
         
         .subtitle {
@@ -47,7 +47,7 @@
         .upload-area {
             border: 3px dashed #667eea;
             border-radius: 15px;
-            padding: 40px;
+            padding: 50px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -65,20 +65,20 @@
         }
         
         .upload-icon {
-            font-size: 48px;
+            font-size: 64px;
             margin-bottom: 15px;
         }
         
         .upload-text {
             color: #667eea;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 600;
+            margin-bottom: 8px;
         }
         
         .upload-hint {
             color: #999;
-            font-size: 13px;
-            margin-top: 8px;
+            font-size: 14px;
         }
         
         #fileInput {
@@ -101,43 +101,67 @@
             margin-top: 20px;
         }
         
+        @media (max-width: 600px) {
+            .preview-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
         .preview-box {
             border-radius: 10px;
             overflow: hidden;
             background: #f5f5f5;
+            border: 2px solid #e0e0e0;
         }
         
         .preview-box h3 {
-            background: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
-            font-size: 14px;
+            font-size: 15px;
+            font-weight: 600;
         }
         
         .preview-image {
             width: 100%;
-            height: 200px;
+            height: 250px;
             object-fit: contain;
             background: white;
+            display: block;
+        }
+        
+        .preview-box.processed .preview-image {
+            background: 
+                linear-gradient(45deg, #ccc 25%, transparent 25%),
+                linear-gradient(-45deg, #ccc 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #ccc 75%),
+                linear-gradient(-45deg, transparent 75%, #ccc 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         }
         
         .btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
+            padding: 16px 30px;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             width: 100%;
-            margin-top: 20px;
-            transition: transform 0.2s ease;
+            margin-top: 25px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
         .btn:hover {
             transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
         }
         
         .btn:disabled {
@@ -146,12 +170,26 @@
             transform: none;
         }
         
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 600px) {
+            .btn-group {
+                grid-template-columns: 1fr;
+            }
+        }
+        
         .status {
             text-align: center;
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 8px;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
             display: none;
+            font-weight: 500;
         }
         
         .status.show {
@@ -159,62 +197,173 @@
         }
         
         .status.processing {
-            background: #fff3cd;
+            background: linear-gradient(135deg, #fff3cd 0%, #ffe8a1 100%);
             color: #856404;
+            border: 1px solid #ffc107;
         }
         
         .status.success {
-            background: #d4edda;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
             color: #155724;
+            border: 1px solid #28a745;
         }
         
         .status.error {
-            background: #f8d7da;
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
             color: #721c24;
+            border: 1px solid #dc3545;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .progress-bar.show {
+            display: block;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 3px;
         }
         
         .footer {
             text-align: center;
             margin-top: 30px;
             color: #999;
-            font-size: 12px;
+            font-size: 13px;
+        }
+        
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 12px;
+        }
+        
+        @media (max-width: 600px) {
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .feature {
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        
+        .feature-text {
+            font-size: 13px;
+            color: #666;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🌀 Image Background Remover</h1>
-        <p class="subtitle">AI-powered background removal in seconds</p>
+        <h1>🌀 图片背景移除工具</h1>
+        <p class="subtitle">AI 驱动，一键去除图片背景，完全免费</p>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🚀</div>
+                <div class="feature-text">快速处理</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <div class="feature-text">本地处理</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💰</div>
+                <div class="feature-text">完全免费</div>
+            </div>
+        </div>
         
         <div class="upload-area" id="uploadArea">
             <div class="upload-icon">📷</div>
-            <div class="upload-text">Click or drag image here</div>
-            <div class="upload-hint">Supports JPG, PNG, WebP</div>
+            <div class="upload-text">点击或拖拽图片到此处</div>
+            <div class="upload-hint">支持 JPG、PNG、WebP 格式</div>
             <input type="file" id="fileInput" accept="image/*">
         </div>
         
         <div class="preview-container" id="previewContainer">
             <div class="preview-grid">
                 <div class="preview-box">
-                    <h3>Original</h3>
-                    <img class="preview-image" id="originalImage" alt="Original">
+                    <h3>📷 原图</h3>
+                    <img class="preview-image" id="originalImage" alt="原图">
                 </div>
-                <div class="preview-box">
-                    <h3>Background Removed</h3>
-                    <img class="preview-image" id="processedImage" alt="Processed">
+                <div class="preview-box processed">
+                    <h3>✨ 处理后</h3>
+                    <img class="preview-image" id="processedImage" alt="处理后">
                 </div>
             </div>
             
-            <button class="btn" id="downloadBtn">⬇️ Download Result</button>
+            <div class="btn-group">
+                <button class="btn" id="downloadBtn">
+                    ⬇️ 下载结果
+                </button>
+                <button class="btn" id="newImageBtn" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                    🔄 处理新图片
+                </button>
+            </div>
         </div>
         
         <div class="status" id="status"></div>
         
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
         <div class="footer">
-            Powered by Cloudflare Pages
+             powered by Cloudflare Pages & imgly
         </div>
     </div>
 
+    <!-- 加载 imgly 背景移除库 -->
+    <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.3.0/dist/imgly-background-removal.min.js"></script>
+    
     <script>
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
@@ -223,21 +372,25 @@
         const processedImage = document.getElementById('processedImage');
         const status = document.getElementById('status');
         const downloadBtn = document.getElementById('downloadBtn');
+        const newImageBtn = document.getElementById('newImageBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
 
         let originalFile = null;
         let processedBlob = null;
+        let processedUrl = null;
 
-        // Click to upload
+        // 点击上传
         uploadArea.addEventListener('click', () => fileInput.click());
 
-        // File selected
+        // 文件选择
         fileInput.addEventListener('change', (e) => {
             if (e.target.files[0]) {
                 handleFile(e.target.files[0]);
             }
         });
 
-        // Drag and drop
+        // 拖拽上传
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadArea.classList.add('dragover');
@@ -257,7 +410,13 @@
 
         function handleFile(file) {
             if (!file.type.startsWith('image/')) {
-                showStatus('Please upload an image file', 'error');
+                showStatus('❌ 请上传图片文件（JPG、PNG 或 WebP）', 'error');
+                return;
+            }
+
+            // 检查文件大小（最大 10MB）
+            if (file.size > 10 * 1024 * 1024) {
+                showStatus('❌ 图片大小不能超过 10MB', 'error');
                 return;
             }
 
@@ -266,23 +425,53 @@
             reader.onload = (e) => {
                 originalImage.src = e.target.result;
                 previewContainer.classList.add('show');
+                uploadArea.style.display = 'none';
                 processImage(file);
             };
             reader.readAsDataURL(file);
         }
 
         async function processImage(file) {
-            showStatus('⏳ Processing image...', 'processing');
-            
-            // TODO: Replace with actual API endpoint
-            // This is a placeholder - you'll need to connect to a backend service
-            setTimeout(() => {
-                // For demo purposes, show the same image
-                processedImage.src = originalImage.src;
-                processedBlob = null; // Will be set by actual API
+            showStatus('⏳ 正在加载 AI 模型，请稍候...', 'processing');
+            showProgress(true);
+            updateProgress(10);
+
+            try {
+                // 使用 imgly 背景移除
+                updateProgress(30);
+                showStatus('⏳ 正在移除背景，这可能需要 10-30 秒...', 'processing');
+
+                const blob = await imglyRemoveBackground(file, {
+                    progress: (key, current, total) => {
+                        const percent = Math.round((current / total) * 100);
+                        updateProgress(30 + (percent * 0.6)); // 30% 到 90%
+                        console.log(`Progress: ${key} - ${current}/${total} (${percent}%)`);
+                    }
+                });
+
+                updateProgress(100);
+                processedBlob = blob;
+                processedUrl = URL.createObjectURL(blob);
+                processedImage.src = processedUrl;
+
+                showStatus('✅ 背景移除成功！', 'success');
+                showProgress(false);
                 
-                showStatus('✅ Background removed! (Demo mode - connect API for real processing)', 'success');
-            }, 2000);
+                // 启用下载按钮
+                downloadBtn.disabled = false;
+            } catch (error) {
+                console.error('Background removal error:', error);
+                showStatus('❌ 处理失败：' + error.message, 'error');
+                showProgress(false);
+            }
+        }
+
+        async function imglyRemoveBackground(file, options) {
+            // 调用 imgly 库
+            const blob = await imglyBackgroundRemoval(file, {
+                progress: options.progress
+            });
+            return blob;
         }
 
         function showStatus(message, type) {
@@ -290,18 +479,53 @@
             status.className = `status show ${type}`;
         }
 
+        function showProgress(show) {
+            progressBar.classList.toggle('show', show);
+        }
+
+        function updateProgress(percent) {
+            progressFill.style.width = percent + '%';
+        }
+
+        // 下载结果
         downloadBtn.addEventListener('click', () => {
             if (processedBlob) {
                 const url = URL.createObjectURL(processedBlob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'background-removed.png';
+                a.download = 'background-removed-' + Date.now() + '.png';
+                document.body.appendChild(a);
                 a.click();
+                document.body.removeChild(a);
                 URL.revokeObjectURL(url);
             } else {
-                showStatus('⚠️ No processed image available', 'error');
+                showStatus('⚠️ 没有可下载的图片', 'error');
             }
         });
+
+        // 处理新图片
+        newImageBtn.addEventListener('click', () => {
+            // 清理
+            if (processedUrl) {
+                URL.revokeObjectURL(processedUrl);
+            }
+            processedBlob = null;
+            processedUrl = null;
+            originalFile = null;
+            
+            // 重置界面
+            previewContainer.classList.remove('show');
+            uploadArea.style.display = 'block';
+            fileInput.value = '';
+            originalImage.src = '';
+            processedImage.src = '';
+            status.classList.remove('show');
+            showProgress(false);
+            downloadBtn.disabled = false;
+        });
+
+        // 初始化
+        downloadBtn.disabled = false;
     </script>
 </body>
 </html>
