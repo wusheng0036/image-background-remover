@@ -252,23 +252,6 @@
             text-decoration: underline;
         }
         
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
         .features {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -357,19 +340,16 @@
         </div>
         
         <div class="footer">
-             powered by Cloudflare Pages & imgly
+            Powered by Cloudflare Pages & imgly
         </div>
     </div>
 
-    <!-- 加载 imgly 背景移除库 -->
-    <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.3.0/dist/imgly-background-removal.min.js"></script>
-    <script>
-        // 配置 imgly 使用正确的 CDN
-        window.imglyConfig = {
-            proxy: {
-                url: 'https://cdn.jsdelivr.net/npm/@imgly/background-removal-data@1.0.0/dist/'
-            }
-        };
+    <!-- 使用 ES 模块方式加载 imgly -->
+    <script type="module">
+        import imglyRemoveBackground from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.3.0/+esm';
+        
+        // 暴露到全局
+        window.imglyRemoveBackground = imglyRemoveBackground;
     </script>
     
     <script>
@@ -445,14 +425,14 @@
             updateProgress(10);
 
             try {
-                // 使用 imgly 背景移除
                 updateProgress(30);
                 showStatus('⏳ 正在移除背景，这可能需要 10-30 秒...', 'processing');
 
-                const blob = await imglyRemoveBackground(file, {
+                // 使用 imgly 背景移除
+                const blob = await window.imglyRemoveBackground(file, {
                     progress: (key, current, total) => {
                         const percent = Math.round((current / total) * 100);
-                        updateProgress(30 + (percent * 0.6)); // 30% 到 90%
+                        updateProgress(30 + (percent * 0.6));
                         console.log(`Progress: ${key} - ${current}/${total} (${percent}%)`);
                     }
                 });
@@ -464,25 +444,11 @@
 
                 showStatus('✅ 背景移除成功！', 'success');
                 showProgress(false);
-                
-                // 启用下载按钮
                 downloadBtn.disabled = false;
             } catch (error) {
                 console.error('Background removal error:', error);
                 showStatus('❌ 处理失败：' + error.message, 'error');
                 showProgress(false);
-            }
-        }
-
-        async function imglyRemoveBackground(file, options) {
-            // imgly 库在全局暴露 imglyBackgroundRemoval 函数
-            if (typeof imglyBackgroundRemoval === 'function') {
-                return await imglyBackgroundRemoval(file, options);
-            } else if (window.imgly && typeof window.imgly.removeBackground === 'function') {
-                return await window.imgly.removeBackground(file, options);
-            } else {
-                console.log('Available globals:', Object.keys(window).filter(k => k.includes('imgly')));
-                throw new Error('imgly 库未正确加载，请刷新页面重试');
             }
         }
 
@@ -517,7 +483,6 @@
 
         // 处理新图片
         newImageBtn.addEventListener('click', () => {
-            // 清理
             if (processedUrl) {
                 URL.revokeObjectURL(processedUrl);
             }
@@ -525,7 +490,6 @@
             processedUrl = null;
             originalFile = null;
             
-            // 重置界面
             previewContainer.classList.remove('show');
             uploadArea.style.display = 'block';
             fileInput.value = '';
