@@ -340,17 +340,12 @@
         </div>
         
         <div class="footer">
-            Powered by Cloudflare Pages & imgly
+            Powered by Cloudflare Pages
         </div>
     </div>
 
-    <!-- 使用 ES 模块方式加载 imgly -->
-    <script type="module">
-        import imglyRemoveBackground from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.3.0/+esm';
-        
-        // 暴露到全局
-        window.imglyRemoveBackground = imglyRemoveBackground;
-    </script>
+    <!-- 使用 UMD 版本加载 imgly -->
+    <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.3.0/dist/imgly-background-removal.umd.js"></script>
     
     <script>
         const uploadArea = document.getElementById('uploadArea');
@@ -428,8 +423,13 @@
                 updateProgress(30);
                 showStatus('⏳ 正在移除背景，这可能需要 10-30 秒...', 'processing');
 
+                // 检查 imgly 库是否加载
+                if (typeof imglyRemoveBackground !== 'function') {
+                    throw new Error('imgly 库未正确加载，请刷新页面重试');
+                }
+
                 // 使用 imgly 背景移除
-                const blob = await window.imglyRemoveBackground(file, {
+                const blob = await imglyRemoveBackground(file, {
                     progress: (key, current, total) => {
                         const percent = Math.round((current / total) * 100);
                         updateProgress(30 + (percent * 0.6));
