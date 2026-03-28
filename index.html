@@ -214,28 +214,6 @@
             border: 1px solid #dc3545;
         }
         
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: #e0e0e0;
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 15px;
-            display: none;
-        }
-        
-        .progress-bar.show {
-            display: block;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            width: 0%;
-            transition: width 0.3s ease;
-            border-radius: 3px;
-        }
-        
         .footer {
             text-align: center;
             margin-top: 30px;
@@ -282,32 +260,82 @@
             font-size: 13px;
             color: #666;
         }
+        
+        .api-key-input {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 12px;
+            border: 2px solid #667eea;
+        }
+        
+        .api-key-input h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .api-key-input input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .api-key-input input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .api-key-input p {
+            font-size: 13px;
+            color: #666;
+            margin: 0;
+        }
+        
+        .api-key-input a {
+            color: #667eea;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🌀 图片背景移除工具</h1>
-        <p class="subtitle">AI 驱动，一键去除图片背景，完全免费</p>
+        <p class="subtitle">使用 remove.bg API，高质量背景移除</p>
         
         <div class="features">
             <div class="feature">
                 <div class="feature-icon">🚀</div>
-                <div class="feature-text">快速处理</div>
+                <div class="feature-text">5 秒处理</div>
             </div>
             <div class="feature">
-                <div class="feature-icon">🔒</div>
-                <div class="feature-text">本地处理</div>
+                <div class="feature-icon">✨</div>
+                <div class="feature-text">高质量</div>
             </div>
             <div class="feature">
-                <div class="feature-icon">💰</div>
-                <div class="feature-text">完全免费</div>
+                <div class="feature-icon">🆓</div>
+                <div class="feature-text">每月 50 张免费</div>
             </div>
         </div>
         
-        <div class="upload-area" id="uploadArea">
+        <div class="api-key-input" id="apiKeyInput">
+            <h4>🔑 需要 API Key</h4>
+            <input type="text" id="apiKey" placeholder="输入你的 remove.bg API Key">
+            <p>
+                没有 API Key？<a href="https://www.remove.bg/api" target="_blank">免费获取</a>（每月 50 张免费）
+            </p>
+            <button class="btn" id="saveApiKeyBtn" style="margin-top: 10px;">
+                💾 保存 API Key
+            </button>
+        </div>
+        
+        <div class="upload-area" id="uploadArea" style="display: none;">
             <div class="upload-icon">📷</div>
             <div class="upload-text">点击或拖拽图片到此处</div>
-            <div class="upload-hint">支持 JPG、PNG、WebP 格式</div>
+            <div class="upload-hint">支持 JPG、PNG 格式（最大 10MB）</div>
             <input type="file" id="fileInput" accept="image/*">
         </div>
         
@@ -335,25 +363,10 @@
         
         <div class="status" id="status"></div>
         
-        <div class="progress-bar" id="progressBar">
-            <div class="progress-fill" id="progressFill"></div>
-        </div>
-        
         <div class="footer">
-            Powered by Cloudflare Pages & @imgly/background-removal
+            Powered by Cloudflare Pages & remove.bg
         </div>
     </div>
-
-    <!-- 加载 imgly 背景移除库 -->
-    <script type="module">
-        import imglyRemoveBackground from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.3.0/dist/index.mjs';
-        
-        // 暴露到全局
-        window.imglyRemoveBackground = imglyRemoveBackground;
-        window.imglyLoaded = true;
-        
-        console.log('✅ imgly 库已加载');
-    </script>
     
     <script>
         const uploadArea = document.getElementById('uploadArea');
@@ -364,12 +377,34 @@
         const status = document.getElementById('status');
         const downloadBtn = document.getElementById('downloadBtn');
         const newImageBtn = document.getElementById('newImageBtn');
-        const progressBar = document.getElementById('progressBar');
-        const progressFill = document.getElementById('progressFill');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const apiKeyField = document.getElementById('apiKey');
+        const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
 
         let originalFile = null;
         let processedBlob = null;
         let processedUrl = null;
+        let apiKey = localStorage.getItem('removebg_api_key') || '';
+
+        // 检查是否已有 API Key
+        if (apiKey) {
+            apiKeyField.value = apiKey;
+            apiKeyInput.style.display = 'none';
+            uploadArea.style.display = 'block';
+        }
+
+        // 保存 API Key
+        saveApiKeyBtn.addEventListener('click', () => {
+            apiKey = apiKeyField.value.trim();
+            if (!apiKey) {
+                showStatus('❌ 请输入 API Key', 'error');
+                return;
+            }
+            localStorage.setItem('removebg_api_key', apiKey);
+            apiKeyInput.style.display = 'none';
+            uploadArea.style.display = 'block';
+            showStatus('✅ API Key 已保存', 'success');
+        });
 
         // 点击上传
         uploadArea.addEventListener('click', () => fileInput.click());
@@ -401,11 +436,10 @@
 
         function handleFile(file) {
             if (!file.type.startsWith('image/')) {
-                showStatus('❌ 请上传图片文件（JPG、PNG 或 WebP）', 'error');
+                showStatus('❌ 请上传图片文件（JPG 或 PNG）', 'error');
                 return;
             }
 
-            // 检查文件大小（最大 10MB）
             if (file.size > 10 * 1024 * 1024) {
                 showStatus('❌ 图片大小不能超过 10MB', 'error');
                 return;
@@ -423,60 +457,51 @@
         }
 
         async function processImage(file) {
-            showStatus('⏳ 正在加载 AI 模型，请稍候...', 'processing');
-            showProgress(true);
-            updateProgress(10);
+            showStatus('⏳ 正在移除背景，请稍候...', 'processing');
 
             try {
-                // 等待 imgly 库加载
-                let maxWait = 0;
-                while (!window.imglyLoaded && maxWait < 50) {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                    maxWait++;
-                }
+                const formData = new FormData();
+                formData.append('image_file', file);
+                formData.append('size', 'auto');
 
-                if (!window.imglyLoaded || typeof window.imglyRemoveBackground !== 'function') {
-                    throw new Error('imgly 库加载失败，请刷新页面重试');
-                }
-
-                updateProgress(30);
-                showStatus('⏳ 正在移除背景，这可能需要 10-30 秒...', 'processing');
-
-                // 使用 imgly 背景移除
-                const blob = await window.imglyRemoveBackground(file, {
-                    progress: (key, current, total) => {
-                        const percent = Math.round((current / total) * 100);
-                        updateProgress(30 + (percent * 0.6));
-                        console.log(`Progress: ${key} - ${current}/${total} (${percent}%)`);
-                    }
+                const response = await fetch('https://api.remove.bg/v1.0/removebg', {
+                    method: 'POST',
+                    headers: {
+                        'X-Api-Key': apiKey
+                    },
+                    body: formData
                 });
 
-                updateProgress(100);
-                processedBlob = blob;
-                processedUrl = URL.createObjectURL(blob);
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.errors[0]?.title || '处理失败');
+                }
+
+                processedBlob = await response.blob();
+                processedUrl = URL.createObjectURL(processedBlob);
                 processedImage.src = processedUrl;
 
                 showStatus('✅ 背景移除成功！', 'success');
-                showProgress(false);
                 downloadBtn.disabled = false;
             } catch (error) {
                 console.error('Background removal error:', error);
-                showStatus('❌ 处理失败：' + error.message, 'error');
-                showProgress(false);
+                
+                if (error.message.includes('Authentication')) {
+                    showStatus('❌ API Key 无效，请检查后重试', 'error');
+                    localStorage.removeItem('removebg_api_key');
+                    apiKeyInput.style.display = 'block';
+                    uploadArea.style.display = 'none';
+                } else if (error.message.includes('credits')) {
+                    showStatus('❌ 免费额度已用完，请下月再来或充值', 'error');
+                } else {
+                    showStatus('❌ 处理失败：' + error.message, 'error');
+                }
             }
         }
 
         function showStatus(message, type) {
             status.textContent = message;
             status.className = `status show ${type}`;
-        }
-
-        function showProgress(show) {
-            progressBar.classList.toggle('show', show);
-        }
-
-        function updateProgress(percent) {
-            progressFill.style.width = percent + '%';
         }
 
         // 下载结果
@@ -510,7 +535,6 @@
             originalImage.src = '';
             processedImage.src = '';
             status.classList.remove('show');
-            showProgress(false);
             downloadBtn.disabled = false;
         });
 
