@@ -1,0 +1,14 @@
+# Image processing
+Pillow>=10.0.0
+numpy>=1.24.0
+
+# Background removal (optional - add your preferred library)
+# rembg>=2.0.0
+# torch>=2.0.0
+# torchvision>=0.15.0
+
+# CLI
+click>=8.0.0
+
+# Testing
+pytest>=7.0.0
