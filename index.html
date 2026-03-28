@@ -363,6 +363,14 @@
 
     <!-- 加载 imgly 背景移除库 -->
     <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.3.0/dist/imgly-background-removal.min.js"></script>
+    <script>
+        // 配置 imgly 使用正确的 CDN
+        window.imglyConfig = {
+            proxy: {
+                url: 'https://cdn.jsdelivr.net/npm/@imgly/background-removal-data@1.0.0/dist/'
+            }
+        };
+    </script>
     
     <script>
         const uploadArea = document.getElementById('uploadArea');
@@ -467,11 +475,15 @@
         }
 
         async function imglyRemoveBackground(file, options) {
-            // 调用 imgly 库
-            const blob = await imglyBackgroundRemoval(file, {
-                progress: options.progress
-            });
-            return blob;
+            // imgly 库在全局暴露 imglyBackgroundRemoval 函数
+            if (typeof imglyBackgroundRemoval === 'function') {
+                return await imglyBackgroundRemoval(file, options);
+            } else if (window.imgly && typeof window.imgly.removeBackground === 'function') {
+                return await window.imgly.removeBackground(file, options);
+            } else {
+                console.log('Available globals:', Object.keys(window).filter(k => k.includes('imgly')));
+                throw new Error('imgly 库未正确加载，请刷新页面重试');
+            }
         }
 
         function showStatus(message, type) {
