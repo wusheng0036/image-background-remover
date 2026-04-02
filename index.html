@@ -181,8 +181,14 @@
     function handleCredentialResponse(response) {
       console.log('收到 Google 登录响应:', response);
       
-      // 解码 JWT token 获取用户信息
-      const userInfo = JSON.parse(atob(response.credential.split('.')[1]));
+      // 解码 JWT token 获取用户信息（正确处理 UTF-8 中文）
+      const base64Url = response.credential.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      const userInfo = JSON.parse(jsonPayload);
+      
       console.log('用户信息:', userInfo);
       
       // 显示用户信息
