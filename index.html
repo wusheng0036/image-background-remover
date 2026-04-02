@@ -5,9 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>图片背景移除工具 🌀</title>
   
-  <!-- Google Sign-In 配置 -->
-  <meta name="google-signin-client_id" content="940353284015-3gfu2heql1mfr01lpau2kv54gepp5ad3.apps.googleusercontent.com">
-  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -92,6 +91,13 @@
       text-align: center; color: #999; font-size: 12px;
       margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;
     }
+    
+    /* Google 登录按钮容器 */
+    #g_id_onload_container {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -102,11 +108,23 @@
     <!-- 登录区域 -->
     <div id="login-section" class="login-section">
       <h3>🔐 登录以保存历史记录</h3>
-      <div class="g-signin2" 
-           data-onsuccess="onSignIn" 
-           data-theme="light"
-           data-width="240"
-           data-height="50"></div>
+      
+      <!-- Google Identity Services 按钮 -->
+      <div id="g_id_onload_container">
+        <div id="g_id_onload"
+             data-client_id="940353284015-3gfu2heql1mfr01lpau2kv54gepp5ad3.apps.googleusercontent.com"
+             data-callback="handleCredentialResponse"
+             data-auto_prompt="false">
+        </div>
+        <div class="g_id_signin"
+             data-type="standard"
+             data-size="large"
+             data-theme="outline"
+             data-text="sign_in_with"
+             data-shape="rectangular"
+             data-logo_alignment="left">
+        </div>
+      </div>
     </div>
     
     <div id="user-section" class="user-info">
@@ -158,36 +176,48 @@
   
   <script>
     // ============ Google 登录相关 ============
-    function onSignIn(googleUser) {
-      const profile = googleUser.getBasicProfile();
-      const idToken = googleUser.getAuthResponse().id_token;
+    
+    // 处理 Google 登录响应
+    function handleCredentialResponse(response) {
+      console.log('收到 Google 登录响应:', response);
       
-      document.getElementById('user-name').textContent = profile.getName();
-      document.getElementById('user-email').textContent = profile.getEmail();
+      // 解码 JWT token 获取用户信息
+      const userInfo = JSON.parse(atob(response.credential.split('.')[1]));
+      console.log('用户信息:', userInfo);
+      
+      // 显示用户信息
+      document.getElementById('user-name').textContent = userInfo.name;
+      document.getElementById('user-email').textContent = userInfo.email;
       document.getElementById('login-section').style.display = 'none';
       document.getElementById('user-section').classList.add('show');
       
-      localStorage.setItem('google_id_token', idToken);
-      localStorage.setItem('user_email', profile.getEmail());
-      localStorage.setItem('user_name', profile.getName());
+      // 存储 token 和用户信息
+      localStorage.setItem('google_id_token', response.credential);
+      localStorage.setItem('user_email', userInfo.email);
+      localStorage.setItem('user_name', userInfo.name);
+      localStorage.setItem('user_picture', userInfo.picture || '');
       localStorage.setItem('user_logged_in', 'true');
       
-      console.log('用户登录:', profile.getEmail());
+      console.log('用户登录成功:', userInfo.email);
     }
     
+    // 退出登录
     function signOut() {
-      const auth2 = gapi.auth2.getAuthInstance();
-      auth2.signOut().then(function() {
-        localStorage.removeItem('google_id_token');
-        localStorage.removeItem('user_email');
-        localStorage.removeItem('user_name');
-        localStorage.removeItem('user_logged_in');
-        document.getElementById('login-section').style.display = 'block';
-        document.getElementById('user-section').classList.remove('show');
-        console.log('用户已退出');
-      });
+      // 清除本地存储
+      localStorage.removeItem('google_id_token');
+      localStorage.removeItem('user_email');
+      localStorage.removeItem('user_name');
+      localStorage.removeItem('user_picture');
+      localStorage.removeItem('user_logged_in');
+      
+      // 显示登录区域
+      document.getElementById('login-section').style.display = 'block';
+      document.getElementById('user-section').classList.remove('show');
+      
+      console.log('用户已退出');
     }
     
+    // 页面加载时检查登录状态
     window.addEventListener('load', function() {
       if (localStorage.getItem('user_logged_in') === 'true') {
         const name = localStorage.getItem('user_name');
