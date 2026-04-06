@@ -1,7 +1,7 @@
 // Cloudflare Pages Function for background removal
 // This runs as a Cloudflare Worker
 
-export async function onRequestPost(context) {
+export async function onRequestPost(context: { request: Request; env: any }) {
   const { request, env } = context;
   
   try {
