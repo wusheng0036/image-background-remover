@@ -1,12 +1,9 @@
-// Cloudflare Pages Function for background removal
-// This runs as a Cloudflare Worker
-
-export async function onRequestPost(context: { request: Request; env: any }) {
+export async function onRequestPost(context) {
   const { request, env } = context;
   
   try {
     const formData = await request.formData();
-    const image = formData.get('image') as File | null;
+    const image = formData.get('image');
     
     if (!image) {
       return new Response(JSON.stringify({ error: '请上传图片' }), {
@@ -66,8 +63,8 @@ export async function onRequestPost(context: { request: Request; env: any }) {
       }
     });
 
-  } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message || '未知错误' }), {
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
