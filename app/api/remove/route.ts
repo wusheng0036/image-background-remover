@@ -1,7 +1,7 @@
 export const runtime = 'edge'
 
-export async function POST(request: Request) {
-  console.log('API called')
+export async function POST(request: Request, { env }: { env: any }) {
+  console.log('API called, env:', Object.keys(env || {}))
   
   try {
     const formData = await request.formData()
@@ -15,7 +15,10 @@ export async function POST(request: Request) {
       return Response.json({ error: '图片大小不能超过 5MB' }, { status: 400 })
     }
 
-    const apiKey = process.env.REMOVE_BG_API_KEY
+    // 尝试从 env 或 process.env 获取 API Key
+    const apiKey = env?.REMOVE_BG_API_KEY || process.env.REMOVE_BG_API_KEY
+    
+    console.log('API Key available:', !!apiKey)
     
     if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
       return Response.json({ error: 'API Key 未配置' }, { status: 500 })
