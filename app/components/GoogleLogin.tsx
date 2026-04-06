@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 
 declare global {
   interface Window {
@@ -67,12 +68,17 @@ export default function GoogleLogin() {
   if (user) {
     return (
       <div className="flex items-center gap-2">
-        <img 
-          src={user.picture} 
-          alt={user.name} 
-          className="w-8 h-8 rounded-full"
-        />
-        <span className="text-sm text-gray-700 hidden sm:inline">{user.name}</span>
+        <Link 
+          href="/dashboard"
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+        >
+          <img 
+            src={user.picture} 
+            alt={user.name} 
+            className="w-8 h-8 rounded-full"
+          />
+          <span className="text-sm text-gray-700 hidden sm:inline">{user.name}</span>
+        </Link>
         <button
           onClick={handleSignOut}
           className="bg-white hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium transition-all shadow-md border border-gray-200 text-sm"
