@@ -6,7 +6,7 @@ export async function onRequestPost(context: { request: Request; env: any }) {
   
   try {
     const formData = await request.formData();
-    const image = formData.get('image');
+    const image = formData.get('image') as File | null;
     
     if (!image) {
       return new Response(JSON.stringify({ error: '请上传图片' }), {
