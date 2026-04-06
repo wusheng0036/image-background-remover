@@ -1,6 +1,7 @@
 'use client'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useDropzone } from 'react-dropzone'
+import Link from 'next/link'
 import GoogleLogin from './components/GoogleLogin'
 
 type BgColor = 'transparent' | 'white' | 'black'
@@ -12,6 +13,15 @@ export default function Home() {
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [bgColor, setBgColor] = useState<BgColor>('transparent')
+  const [user, setUser] = useState<any>(null)
+  const [quota, setQuota] = useState({ used: 0, limit: 50 })
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user')
+    if (savedUser) {
+      setUser(JSON.parse(savedUser))
+    }
+  }, [])
 
   const onDrop = useCallback((files: File[]) => {
     if (files.length === 0) return
@@ -79,17 +89,41 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="py-8 px-4 text-center relative">
-        {/* Login Button - Top Right */}
-        <div className="absolute top-4 right-4 flex items-center gap-3">
-          <GoogleLogin />
+      {/* Navigation */}
+      <nav className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <Link href="/" className="text-2xl font-bold text-gray-800">
+            🌀 背景移除工具
+          </Link>
+          <div className="flex items-center gap-6">
+            <Link href="/pricing" className="text-gray-600 hover:text-gray-800">
+              定价
+            </Link>
+            <Link href="/faq" className="text-gray-600 hover:text-gray-800">
+              FAQ
+            </Link>
+            <GoogleLogin />
+          </div>
         </div>
-        
+      </nav>
+
+      {/* Header */}
+      <header className="py-8 px-4 text-center">
         <h1 className="text-5xl font-bold text-gray-800 mb-3">
           AI 一键去除图片背景
         </h1>
-        <p className="text-xl text-gray-600">3 秒抠图，无需 PS，支持 4K 高清</p>
+        <p className="text-xl text-gray-600 mb-4">3 秒抠图，无需 PS，支持 4K 高清</p>
+        
+        {/* Free Quota Info */}
+        <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md">
+          <span className="text-sm text-gray-600">
+            {user ? (
+              <>本月已使用 {quota.used}/{quota.limit} 张免费额度</>
+            ) : (
+              <>未登录用户每月 50 张免费额度，<Link href="/pricing" className="text-blue-600 hover:underline">查看定价</Link></>
+            )}
+          </span>
+        </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -274,17 +308,71 @@ export default function Home() {
               <p className="text-gray-600">图片不存储，处理完即删除</p>
             </div>
             <div className="bg-white rounded-2xl p-8 shadow-lg text-center">
-              <div className="text-5xl mb-4">💰</div>
-              <h3 className="font-bold text-xl text-gray-800 mb-2">完全免费</h3>
-              <p className="text-gray-600">无限制使用</p>
+              <div className="text-5xl mb-4">🎨</div>
+              <h3 className="font-bold text-xl text-gray-800 mb-2">高清输出</h3>
+              <p className="text-gray-600">支持 4K 高清图片</p>
+            </div>
+          </div>
+        )}
+
+        {/* Pricing CTA */}
+        {!original && (
+          <div className="mt-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl p-8 text-center text-white">
+            <h2 className="text-3xl font-bold mb-4">需要更多额度？</h2>
+            <p className="text-lg mb-6">升级到专业版，每月 500 张高清处理，无水印输出</p>
+            <div className="flex gap-4 justify-center">
+              <Link
+                href="/pricing"
+                className="bg-white text-blue-600 px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+              >
+                查看定价
+              </Link>
+              <Link
+                href="/faq"
+                className="bg-blue-700 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-800 transition-colors"
+              >
+                了解更多
+              </Link>
             </div>
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <footer className="py-8 text-center text-gray-500 text-sm">
-        Powered by Remove.bg API
+      <footer className="bg-gray-800 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <h3 className="font-bold text-lg mb-4">🌀 背景移除工具</h3>
+              <p className="text-gray-400">AI 驱动的图片背景移除工具，3 秒完成，无需 PS。</p>
+            </div>
+            <div>
+              <h4 className="font-medium mb-4">产品</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li><Link href="/" className="hover:text-white">首页</Link></li>
+                <li><Link href="/pricing" className="hover:text-white">定价</Link></li>
+                <li><Link href="/faq" className="hover:text-white">FAQ</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium mb-4">支持</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li><Link href="/faq" className="hover:text-white">帮助中心</Link></li>
+                <li><a href="mailto:support@imagebackgroundremover.guru" className="hover:text-white">联系我们</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium mb-4">法律</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li><Link href="/privacy" className="hover:text-white">隐私政策</Link></li>
+                <li><Link href="/terms" className="hover:text-white">服务条款</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-700 pt-8 text-center text-gray-400">
+            <p>© 2026 背景移除工具. 保留所有权利.</p>
+          </div>
+        </div>
       </footer>
     </main>
   )
