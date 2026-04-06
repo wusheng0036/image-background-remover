@@ -1,10 +1,12 @@
 'use client'
 import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
+import { useSession, signIn, signOut } from 'next-auth/react'
 
 type BgColor = 'transparent' | 'white' | 'black'
 
 export default function Home() {
+  const { data: session, status } = useSession()
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [original, setOriginal] = useState<string | null>(null)
   const [processed, setProcessed] = useState<string | null>(null)
@@ -82,11 +84,31 @@ export default function Home() {
       <header className="py-8 px-4 text-center relative">
         {/* Login Button - Top Right */}
         <div className="absolute top-4 right-4 flex items-center gap-3">
-          <button
-            className="bg-white hover:bg-gray-100 text-gray-700 px-6 py-2 rounded-lg font-medium transition-all shadow-md border border-gray-200 flex items-center gap-2"
-          >
-            👤 登录
-          </button>
+          {status === 'authenticated' && session?.user ? (
+            <div className="flex items-center gap-2">
+              {session.user.image && (
+                <img 
+                  src={session.user.image} 
+                  alt={session.user.name || 'User'} 
+                  className="w-8 h-8 rounded-full"
+                />
+              )}
+              <span className="text-sm text-gray-700 hidden sm:inline">{session.user.name}</span>
+              <button
+                onClick={() => signOut()}
+                className="bg-white hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium transition-all shadow-md border border-gray-200 text-sm"
+              >
+                退出
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => signIn()}
+              className="bg-white hover:bg-gray-100 text-gray-700 px-6 py-2 rounded-lg font-medium transition-all shadow-md border border-gray-200 flex items-center gap-2"
+            >
+              👤 登录
+            </button>
+          )}
         </div>
         
         <h1 className="text-5xl font-bold text-gray-800 mb-3">
