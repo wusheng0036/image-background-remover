@@ -66,8 +66,8 @@ export async function onRequestPost(context: { request: Request; env: any }) {
       }
     });
 
-  } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+  } catch (error: any) {
+    return new Response(JSON.stringify({ error: error.message || '未知错误' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
