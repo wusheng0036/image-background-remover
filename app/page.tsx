@@ -112,18 +112,7 @@ export default function Home() {
         <h1 className="text-5xl font-bold text-gray-800 mb-3">
           AI 一键去除图片背景
         </h1>
-        <p className="text-xl text-gray-600 mb-4">3 秒抠图，无需 PS，支持 4K 高清</p>
-        
-        {/* Free Quota Info */}
-        <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md">
-          <span className="text-sm text-gray-600">
-            {user ? (
-              <>本月已使用 {quota.used}/{quota.limit} 张免费额度</>
-            ) : (
-              <>未登录用户每月 50 张免费额度，<Link href="/pricing" className="text-blue-600 hover:underline">查看定价</Link></>
-            )}
-          </span>
-        </div>
+        <p className="text-xl text-gray-600">3 秒抠图，无需 PS，支持 4K 高清</p>
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
