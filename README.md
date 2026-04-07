@@ -30,3 +30,4 @@ python main.py --input input.jpg --output output.png
 ## License
 
 MIT
+# Pricing Page Updated
