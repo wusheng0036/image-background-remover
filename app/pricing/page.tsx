@@ -27,14 +27,14 @@ export default function PricingPage() {
       const result = await response.json();
 
       if (result.success) {
-        alert(`✅ 支付成功！${PACKAGES[packageId as keyof typeof PACKAGES].credits} 积分已添加到您的账户。`);
+        alert(`✅ Payment successful! ${PACKAGES[packageId as keyof typeof PACKAGES].credits} credits have been added to your account.`);
         setSelectedPackage(null);
       } else {
-        alert('❌ 支付处理失败，请联系客服');
+        alert('❌ Payment processing failed. Please contact support.');
       }
     } catch (error) {
       console.error('Payment error:', error);
-      alert('❌ 支付失败，请重试');
+      alert('❌ Payment failed. Please try again.');
     }
   };
 
@@ -69,7 +69,7 @@ export default function PricingPage() {
           await handleApprove(packageId, data.orderID);
         }}
         onError={() => {
-          alert('❌ 支付出错，请重试');
+          alert('❌ Payment error. Please try again.');
         }}
         onCancel={() => {
           console.log('Payment cancelled');
@@ -83,7 +83,7 @@ export default function PricingPage() {
       clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'AZ1p5M9Y9yMmqcIn8U4jgFDHyRM9wR_jFb7VAx0yFhp8FAuuQmifwhj7CRIpVPkD6pBtWhAS5ByN9kjk',
       currency: 'USD',
       intent: 'capture',
-      locale: 'zh_CN',
+      locale: 'en_US',
       commit: false,
     }}>
       <main className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
