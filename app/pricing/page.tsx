@@ -27,17 +27,14 @@ export default function PricingPage() {
       const result = await response.json();
 
       if (result.success) {
-        // TODO: 支付成功后处理
-        // - 更新用户积分
-        // - 跳转成功页面或显示成功提示
-        alert(`支付成功！${PACKAGES[packageId as keyof typeof PACKAGES].credits} 积分已添加到您的账户。`);
+        alert(`✅ 支付成功！${PACKAGES[packageId as keyof typeof PACKAGES].credits} 积分已添加到您的账户。`);
         setSelectedPackage(null);
       } else {
-        alert('支付处理失败，请联系客服');
+        alert('❌ 支付处理失败，请联系客服');
       }
     } catch (error) {
       console.error('Payment error:', error);
-      alert('支付失败，请重试');
+      alert('❌ 支付失败，请重试');
     }
   };
 
@@ -46,7 +43,15 @@ export default function PricingPage() {
     
     return (
       <PayPalButtons
-        style={{ layout: 'vertical' }}
+        style={{ 
+          layout: 'vertical',
+          color: 'gold',
+          shape: 'rect',
+          label: 'paypal',
+          height: 45
+        }}
+        fundingSource={undefined}
+        forceReRender={[pkg.price, pkg.credits]}
         createOrder={async () => {
           const response = await fetch('/api/paypal/create-order', {
             method: 'POST',
@@ -54,7 +59,7 @@ export default function PricingPage() {
             body: JSON.stringify({
               amount: pkg.price,
               currency: 'USD',
-              description: `${pkg.credits} credits - ${pkg.type === 'subscription' ? 'Monthly Subscription' : 'One-time Purchase'}`,
+              description: `${pkg.credits} credits`,
             }),
           });
           const data = await response.json();
@@ -64,7 +69,10 @@ export default function PricingPage() {
           await handleApprove(packageId, data.orderID);
         }}
         onError={() => {
-          alert('支付出错，请重试');
+          alert('❌ 支付出错，请重试');
+        }}
+        onCancel={() => {
+          console.log('Payment cancelled');
         }}
       />
     );
@@ -75,42 +83,44 @@ export default function PricingPage() {
       clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'AZ1p5M9Y9yMmqcIn8U4jgFDHyRM9wR_jFb7VAx0yFhp8FAuuQmifwhj7CRIpVPkD6pBtWhAS5ByN9kjk',
       currency: 'USD',
       intent: 'capture',
+      locale: 'zh_CN',
+      commit: false,
     }}>
-      <main className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <main className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
         <div className="max-w-6xl mx-auto px-4 py-16">
           {/* Hero */}
           <section className="text-center mb-16">
-            <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+            <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
               Simple, flexible pricing
             </h1>
-            <p className="text-xl text-gray-400 mb-8">
+            <p className="text-xl text-gray-300 mb-8">
               Start free, then choose what works for you. Credits never expire.
             </p>
-            <div className="inline-flex items-center gap-2 bg-slate-800 border border-slate-700 px-6 py-3 rounded-full">
+            <div className="inline-flex items-center gap-2 bg-slate-800/80 border-2 border-green-500/50 px-6 py-3 rounded-full shadow-lg shadow-green-500/20">
               <span>🎉</span>
               <span className="text-green-400 font-bold">3 free images</span>
-              <span className="text-gray-400">to get started — no credit card required</span>
+              <span className="text-gray-300">to get started — no credit card required</span>
             </div>
           </section>
 
           {/* Credit Packs */}
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-2">Credit Packs</h2>
-            <p className="text-gray-400">One-time purchase. Use anytime. Perfect for occasional use.</p>
+            <h2 className="text-3xl font-bold mb-2 text-white">Credit Packs</h2>
+            <p className="text-gray-300">One-time purchase. Use anytime. Perfect for occasional use.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 mb-16">
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
             {/* Starter - $4.99 */}
-            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-8 hover:border-indigo-500 transition-all hover:-translate-y-1">
-              <div className="text-5xl font-bold mb-1">10 <span className="text-xl">credits</span></div>
-              <div className="text-3xl font-bold mb-1">$4.99</div>
+            <div className="bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-slate-600 rounded-2xl p-8 hover:border-indigo-400 transition-all hover:-translate-y-2 shadow-xl">
+              <div className="text-5xl font-bold mb-1 text-white">10 <span className="text-xl text-gray-400">credits</span></div>
+              <div className="text-3xl font-bold mb-1 text-white">$4.99</div>
               <div className="text-gray-400 mb-6">$0.50 per image</div>
               {selectedPackage === 'starter' ? (
                 <PayPalButton packageId="starter" />
               ) : (
                 <button 
                   onClick={() => setSelectedPackage('starter')}
-                  className="w-full py-3 px-6 bg-slate-700 hover:bg-slate-600 rounded-lg font-semibold transition-all"
+                  className="w-full py-3 px-6 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-all border-2 border-slate-500"
                 >
                   Buy Starter Pack
                 </button>
@@ -118,19 +128,19 @@ export default function PricingPage() {
             </div>
 
             {/* Popular - $12.99 */}
-            <div className="bg-slate-800 border-2 border-indigo-500 rounded-2xl p-8 relative hover:-translate-y-1 transition-all">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-sm font-bold px-4 py-1 rounded-full">
+            <div className="bg-gradient-to-b from-indigo-900 to-slate-900 border-2 border-indigo-400 rounded-2xl p-8 relative hover:-translate-y-2 transition-all shadow-xl shadow-indigo-500/30">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-sm font-bold px-4 py-1 rounded-full shadow-lg">
                 ⭐ Most Popular
               </div>
-              <div className="text-5xl font-bold mb-1">30 <span className="text-xl">credits</span></div>
-              <div className="text-3xl font-bold mb-1">$12.99</div>
+              <div className="text-5xl font-bold mb-1 text-white">30 <span className="text-xl text-gray-400">credits</span></div>
+              <div className="text-3xl font-bold mb-1 text-white">$12.99</div>
               <div className="text-gray-400 mb-6">$0.43 per image</div>
               {selectedPackage === 'popular' ? (
                 <PayPalButton packageId="popular" />
               ) : (
                 <button 
                   onClick={() => setSelectedPackage('popular')}
-                  className="w-full py-3 px-6 bg-gradient-to-r from-indigo-500 to-purple-500 hover:opacity-90 rounded-lg font-semibold transition-all"
+                  className="w-full py-3 px-6 bg-gradient-to-r from-indigo-500 to-purple-500 hover:opacity-90 text-white rounded-lg font-semibold transition-all shadow-lg"
                 >
                   Buy Popular Pack
                 </button>
@@ -138,19 +148,19 @@ export default function PricingPage() {
             </div>
 
             {/* Pro Pack - $29.99 */}
-            <div className="bg-slate-800 border-2 border-green-500 rounded-2xl p-8 relative hover:-translate-y-1 transition-all">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 text-slate-900 text-sm font-bold px-4 py-1 rounded-full">
-                Best Value
+            <div className="bg-gradient-to-b from-green-900 to-slate-900 border-2 border-green-400 rounded-2xl p-8 relative hover:-translate-y-2 transition-all shadow-xl shadow-green-500/30">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 text-slate-900 text-sm font-bold px-4 py-1 rounded-full shadow-lg">
+                💎 Best Value
               </div>
-              <div className="text-5xl font-bold mb-1">80 <span className="text-xl">credits</span></div>
-              <div className="text-3xl font-bold mb-1">$29.99</div>
+              <div className="text-5xl font-bold mb-1 text-white">80 <span className="text-xl text-gray-400">credits</span></div>
+              <div className="text-3xl font-bold mb-1 text-white">$29.99</div>
               <div className="text-gray-400 mb-6">$0.37 per image</div>
               {selectedPackage === 'pro' ? (
                 <PayPalButton packageId="pro" />
               ) : (
                 <button 
                   onClick={() => setSelectedPackage('pro')}
-                  className="w-full py-3 px-6 bg-green-500 hover:bg-green-400 text-slate-900 rounded-lg font-semibold transition-all"
+                  className="w-full py-3 px-6 bg-green-500 hover:bg-green-400 text-slate-900 rounded-lg font-semibold transition-all shadow-lg"
                 >
                   Buy Pro Pack
                 </button>
@@ -160,21 +170,21 @@ export default function PricingPage() {
 
           {/* Subscriptions */}
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-2">Monthly Subscriptions</h2>
-            <p className="text-gray-400">Best value for regular users. Credits refresh monthly.</p>
+            <h2 className="text-3xl font-bold mb-2 text-white">Monthly Subscriptions</h2>
+            <p className="text-gray-300">Best value for regular users. Credits refresh monthly.</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Basic - $7.99 */}
-            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-8 hover:border-green-500 transition-all">
-              <div className="inline-block bg-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full mb-4">
+            <div className="bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-slate-600 rounded-2xl p-8 hover:border-green-400 transition-all hover:-translate-y-2 shadow-xl">
+              <div className="inline-block bg-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full mb-4 border border-green-500/30">
                 Save vs Packs
               </div>
-              <div className="text-2xl font-bold mb-2">Basic</div>
+              <div className="text-2xl font-bold mb-2 text-white">Basic</div>
               <div className="text-4xl font-bold text-green-400 mb-1">30 <span className="text-base text-gray-400">credits/month</span></div>
-              <div className="text-2xl font-bold mb-1">$7.99/month</div>
+              <div className="text-2xl font-bold mb-1 text-white">$7.99/month</div>
               <div className="text-green-400 font-semibold mb-6">$0.27 per image</div>
-              <ul className="space-y-3 mb-6 text-gray-400 text-sm">
+              <ul className="space-y-3 mb-6 text-gray-300 text-sm">
                 <li className="flex items-center gap-2"><span className="text-green-400">✓</span> Credits refresh monthly</li>
                 <li className="flex items-center gap-2"><span className="text-green-400">✓</span> Cancel anytime</li>
                 <li className="flex items-center gap-2"><span className="text-green-400">✓</span> Unused credits roll over*</li>
@@ -184,7 +194,7 @@ export default function PricingPage() {
               ) : (
                 <button 
                   onClick={() => setSelectedPackage('basic')}
-                  className="w-full py-3 px-6 bg-slate-700 hover:bg-slate-600 rounded-lg font-semibold transition-all"
+                  className="w-full py-3 px-6 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-all border-2 border-slate-500"
                 >
                   Subscribe Basic
                 </button>
@@ -192,15 +202,15 @@ export default function PricingPage() {
             </div>
 
             {/* Pro - $15.99 */}
-            <div className="bg-slate-800 border-2 border-green-500 rounded-2xl p-8 relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 text-slate-900 text-sm font-bold px-4 py-1 rounded-full">
-                Best Value
+            <div className="bg-gradient-to-b from-green-900 to-slate-900 border-2 border-green-400 rounded-2xl p-8 relative hover:-translate-y-2 transition-all shadow-xl shadow-green-500/20">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 text-slate-900 text-sm font-bold px-4 py-1 rounded-full shadow-lg">
+                💎 Best Value
               </div>
-              <div className="text-2xl font-bold mb-2">Pro</div>
+              <div className="text-2xl font-bold mb-2 text-white">Pro</div>
               <div className="text-4xl font-bold text-green-400 mb-1">80 <span className="text-base text-gray-400">credits/month</span></div>
-              <div className="text-2xl font-bold mb-1">$15.99/month</div>
+              <div className="text-2xl font-bold mb-1 text-white">$15.99/month</div>
               <div className="text-green-400 font-semibold mb-6">$0.20 per image</div>
-              <ul className="space-y-3 mb-6 text-gray-400 text-sm">
+              <ul className="space-y-3 mb-6 text-gray-300 text-sm">
                 <li className="flex items-center gap-2"><span className="text-green-400">✓</span> Credits refresh monthly</li>
                 <li className="flex items-center gap-2"><span className="text-green-400">✓</span> Cancel anytime</li>
                 <li className="flex items-center gap-2"><span className="text-green-400">✓</span> Unused credits roll over*</li>
@@ -211,7 +221,7 @@ export default function PricingPage() {
               ) : (
                 <button 
                   onClick={() => setSelectedPackage('pro-sub')}
-                  className="w-full py-3 px-6 bg-green-500 hover:bg-green-400 text-slate-900 rounded-lg font-semibold transition-all"
+                  className="w-full py-3 px-6 bg-green-500 hover:bg-green-400 text-slate-900 rounded-lg font-semibold transition-all shadow-lg"
                 >
                   Subscribe Pro
                 </button>
