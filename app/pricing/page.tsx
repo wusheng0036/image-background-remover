@@ -74,6 +74,7 @@ export default function PricingPage() {
         onCancel={() => {
           console.log('Payment cancelled');
         }}
+        fundingSource="paypal"
       />
     );
   };
