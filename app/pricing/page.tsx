@@ -50,7 +50,6 @@ export default function PricingPage() {
           label: 'paypal',
           height: 45
         }}
-        fundingSource={undefined}
         forceReRender={[pkg.price, pkg.credits]}
         createOrder={async () => {
           const response = await fetch('/api/paypal/create-order', {
