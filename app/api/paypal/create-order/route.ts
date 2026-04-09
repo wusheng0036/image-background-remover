@@ -16,8 +16,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 判断是否为沙箱环境（沙箱 Client ID 通常较短，或以 Ae 开头）
+    const isSandbox = clientId.startsWith('Ae') || clientId.length < 50;
+    const baseUrl = isSandbox 
+      ? 'https://api-m.sandbox.paypal.com' 
+      : 'https://api-m.paypal.com';
+
     const tokenResponse = await fetch(
-      'https://api-m.paypal.com/v1/oauth2/token',
+      `${baseUrl}/v1/oauth2/token`,
       {
         method: 'POST',
         headers: {
@@ -37,7 +43,7 @@ export async function POST(request: NextRequest) {
     }
 
     const orderResponse = await fetch(
-      'https://api-m.paypal.com/v2/checkout/orders',
+      `${baseUrl}/v2/checkout/orders`,
       {
         method: 'POST',
         headers: {
