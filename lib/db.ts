@@ -1,7 +1,7 @@
 export async function initDB() {}
-export async function addCredits() {}
-export async function createOrder() {}
-export async function getUserByEmail() { return null; }
-export async function createUser() {}
-export async function updateOrderStatus() {}
-export async function getUserCredits() { return 999; }
+export async function addCredits(userId: string, credits: number) {}
+export async function createOrder(order: any) {}
+export async function getUserByEmail(email: string) { return null; }
+export async function createUser(email: string, paypalEmail: string) {}
+export async function updateOrderStatus(paypalOrderId: string, status: string) {}
+export async function getUserCredits(userId: string) { return 999; }
