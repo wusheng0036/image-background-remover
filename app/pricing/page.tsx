@@ -79,12 +79,14 @@ export default function PricingPage() {
 
   return (
     <PayPalScriptProvider options={{ 
-      clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'AZ1p5M9Y9yMmqcIn8U4jgFDHyRM9wR_jFb7VAx0yFhp8FAuuQmifwhj7CRIpVPkD6pBtWhAS5ByN9kjk',
+      clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'Ae316YOk6i3rlT2YrFNBbjoLcMCC3j9uJYJqohQSYA9ObqZqoxpdtDIP2IWbnZMo9g0HD278u7LmJKdU',
       currency: 'USD',
       intent: 'capture',
       locale: 'en_US',
       commit: false,
       disableFunding: 'card,credit,bancontact,giropay,ideal,mybank,sofort,venmo',
+      // 沙箱环境
+      'enable-funding': 'sandbox',
     }}>
       <main className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
         <div className="max-w-6xl mx-auto px-4 py-16">
