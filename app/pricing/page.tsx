@@ -40,40 +40,60 @@ export default function PricingPage() {
 
   const PayPalButton = ({ packageId }: { packageId: string }) => {
     const pkg = PACKAGES[packageId as keyof typeof PACKAGES];
+    const [error, setError] = useState<string | null>(null);
     
     return (
-      <PayPalButtons
-        style={{ 
-          layout: 'vertical',
-          color: 'gold',
-          shape: 'rect',
-          label: 'paypal',
-          height: 45
-        }}
-        forceReRender={[pkg.price, pkg.credits]}
-        createOrder={async () => {
-          const response = await fetch('/api/paypal/create-order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              amount: pkg.price,
-              currency: 'USD',
-              description: `${pkg.credits} credits`,
-            }),
-          });
-          const data = await response.json();
-          return data.orderId;
-        }}
-        onApprove={async (data: any) => {
-          await handleApprove(packageId, data.orderID);
-        }}
-        onError={() => {
-          alert('❌ Payment error. Please try again.');
-        }}
-        onCancel={() => {
-          console.log('Payment cancelled');
-        }}
-      />
+      <div className="w-full">
+        {error && (
+          <div className="mb-2 p-2 bg-red-500/20 border border-red-500 rounded text-red-400 text-sm">
+            {error}
+          </div>
+        )}
+        <PayPalButtons
+          style={{ 
+            layout: 'vertical',
+            color: 'gold',
+            shape: 'rect',
+            label: 'paypal',
+            height: 45
+          }}
+          forceReRender={[pkg.price, pkg.credits]}
+          createOrder={async () => {
+            try {
+              const response = await fetch('/api/paypal/create-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  amount: pkg.price,
+                  currency: 'USD',
+                  description: `${pkg.credits} credits`,
+                }),
+              });
+              const data = await response.json();
+              if (data.error) {
+                setError(data.error);
+                throw new Error(data.error);
+              }
+              return data.orderId;
+            } catch (err: any) {
+              setError(err.message || 'Failed to create order');
+              throw err;
+            }
+          }}
+          onApprove={async (data: any) => {
+            await handleApprove(packageId, data.orderID);
+          }}
+          onError={(err) => {
+            console.error('PayPal error:', err);
+            setError('PayPal 加载失败，请刷新页面重试');
+            alert('❌ Payment error. Please try again.');
+          }}
+          onCancel={() => {
+            console.log('Payment cancelled');
+            setSelectedPackage(null);
+          }}
+        />
+      </div>
     );
   };
 
