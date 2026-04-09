@@ -5,6 +5,9 @@ pages_build_output_dir = ".vercel/output/static"
 
 [vars]
 REMOVE_BG_API_KEY = "QqhFaNyAce2QwYzm7m82MUyR"
+NEXT_PUBLIC_PAYPAL_CLIENT_ID = "Ae316YOk6i3rlT2YrFNBbjoLcMCC3j9uJYJqohQSYA9ObqZqoxpdtDIP2IWbnZMo9g0HD278u7LmJKdU"
+PAYPAL_CLIENT_ID = "Ae316YOk6i3rlT2YrFNBbjoLcMCC3j9uJYJqohQSYA9ObqZqoxpdtDIP2IWbnZMo9g0HD278u7LmJKdU"
+PAYPAL_SECRET = "EB4qwa7WUtOBlk85O6qMeUJuAdjuemmU7TD8Pq8l9HnCuFdGSKpOCCsCGACWSs2a0DR_nk8lYbS-pWtY"
 
 # D1 数据库绑定
 [[d1_databases]]
