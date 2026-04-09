@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { initDB, addCredits, createOrder, getUserByEmail, createUser } from '../../lib/db';
+import { initDB, addCredits, createOrder, getUserByEmail, createUser } from '../../../lib/db';
 
 // 套餐配置
 const PACKAGES: Record<string, { credits: number; price: string }> = {
