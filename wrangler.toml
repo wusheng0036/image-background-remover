@@ -9,4 +9,4 @@ REMOVE_BG_API_KEY = "QqhFaNyAce2QwYzm7m82MUyR"
 [[d1_databases]]
 binding = "DB"
 database_name = "task-database"
-database_id = "PASTE_YOUR_DATABASE_UUID_HERE"
+database_id = "c992aed2-c495-4302-95c6-4ef88eeee220"
