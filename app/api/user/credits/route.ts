@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const user = await getUserByEmail(email);
+    const user: any = await getUserByEmail(email);
     
     if (!user) {
       return NextResponse.json({
@@ -27,12 +27,12 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const credits = await getUserCredits(user.id);
+    const credits = await getUserCredits(user.email || 'default-user');
 
     return NextResponse.json({
       exists: true,
       email: user.email,
-      credits,
+      credits: credits || 0,
     });
 
   } catch (error) {
