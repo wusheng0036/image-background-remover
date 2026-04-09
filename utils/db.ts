@@ -6,6 +6,63 @@ export function getDB(): D1Database {
   return globalThis.DB;
 }
 
+// 初始化数据库表（自动创建）
+export async function initDB() {
+  const db = getDB();
+  if (!db) return;
+
+  try {
+    // 创建用户表
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        email TEXT UNIQUE,
+        paypal_email TEXT,
+        credits INTEGER DEFAULT 0,
+        created_at INTEGER DEFAULT (strftime('%s', 'now')),
+        updated_at INTEGER DEFAULT (strftime('%s', 'now'))
+      )
+    `);
+
+    // 创建订单表
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS orders (
+        id TEXT PRIMARY KEY,
+        user_id TEXT,
+        paypal_order_id TEXT UNIQUE,
+        amount REAL,
+        currency TEXT,
+        credits INTEGER,
+        status TEXT,
+        created_at INTEGER DEFAULT (strftime('%s', 'now')),
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      )
+    `);
+
+    // 创建积分使用记录表
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS credit_usage (
+        id TEXT PRIMARY KEY,
+        user_id TEXT,
+        credits_used INTEGER,
+        description TEXT,
+        created_at INTEGER DEFAULT (strftime('%s', 'now')),
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      )
+    `);
+
+    // 创建索引
+    await db.exec(`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`);
+    await db.exec(`CREATE INDEX IF NOT EXISTS idx_orders_paypal ON orders(paypal_order_id)`);
+    await db.exec(`CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id)`);
+    await db.exec(`CREATE INDEX IF NOT EXISTS idx_usage_user ON credit_usage(user_id)`);
+
+    console.log('✅ Database tables initialized');
+  } catch (error) {
+    console.error('Failed to initialize database:', error);
+  }
+}
+
 // 获取或创建用户
 export async function getUserByEmail(email: string) {
   const db = getDB();

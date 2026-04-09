@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { addCredits, createOrder, getUserByEmail, createUser } from '../../../utils/db';
+import { initDB, addCredits, createOrder, getUserByEmail, createUser } from '../../../utils/db';
 
 // 套餐配置
 const PACKAGES: Record<string, { credits: number; price: string }> = {
@@ -14,6 +14,9 @@ export const runtime = 'edge';
 
 export async function POST(request: NextRequest) {
   try {
+    // 初始化数据库表
+    await initDB();
+
     const { orderId, payerEmail } = await request.json();
 
     const clientId = process.env.PAYPAL_CLIENT_ID;
