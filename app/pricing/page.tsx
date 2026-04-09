@@ -18,23 +18,28 @@ export default function PricingPage() {
 
   const handleApprove = async (packageId: string, orderId: string) => {
     try {
+      // 获取买家邮箱（从 PayPal 获取）
       const response = await fetch('/api/paypal/capture-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId }),
+        body: JSON.stringify({ 
+          orderId,
+          packageId,
+        }),
       });
 
       const result = await response.json();
 
       if (result.success) {
-        alert(`✅ Payment successful! ${PACKAGES[packageId as keyof typeof PACKAGES].credits} credits have been added to your account.`);
+        const pkg = PACKAGES[packageId as keyof typeof PACKAGES];
+        alert(`✅ 支付成功！\n\n获得 ${pkg.credits} 积分\n当前总积分：${result.totalCredits || pkg.credits}\n\n积分已添加到您的账户！`);
         setSelectedPackage(null);
       } else {
-        alert('❌ Payment processing failed. Please contact support.');
+        alert(`❌ 支付处理失败\n\n错误：${result.error || 'Unknown error'}\n\n请联系客服支持。`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Payment error:', error);
-      alert('❌ Payment failed. Please try again.');
+      alert(`❌ 支付失败\n\n${error.message || 'Please try again.'}`);
     }
   };
 
