@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { addCredits, createOrder, getUserByEmail, createUser, updateOrderStatus } from '../db';
+import { addCredits, createOrder, getUserByEmail, createUser, updateOrderStatus } from '../../lib/db';
 
 // 套餐配置
 const PACKAGES: Record<string, { credits: number; price: string }> = {
