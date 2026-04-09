@@ -81,13 +81,13 @@ export async function POST(request: NextRequest) {
     const packageInfo = PACKAGES[amount] || { credits: 0, price: amount };
 
     // 获取或创建用户
-    let user = await getUserByEmail(payerPaypalEmail);
+    let user: any = await getUserByEmail(payerPaypalEmail);
     if (!user) {
       user = await createUser(payerPaypalEmail, payerPaypalEmail);
     }
 
     // 添加积分
-    await addCredits(user.id, packageInfo.credits);
+    await addCredits(user.id || 'default-user', packageInfo.credits);
 
     // 记录订单
     await createOrder({
