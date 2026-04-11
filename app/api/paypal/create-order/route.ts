@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
           'Accept': 'application/json',
           'Accept-Language': 'en_US',
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': 'Basic ' + Buffer.from(`${clientId}:${secret}`).toString('base64'),
+          'Authorization': 'Basic ' + btoa(`${clientId}:${secret}`),
         },
         body: 'grant_type=client_credentials',
       }
